@@ -68,7 +68,7 @@ Abra o Codex em uma **pasta vazia** para começar o projeto.
 └── imagens/                    # slide e logo usados como referência visual
 ```
 
-## Passo 2: Frontend
+## Passo 1: Frontend
 
 Anexe as imagens de referência (slide e logo) e cole este prompt no Codex:
 
@@ -112,7 +112,7 @@ Troque o valor de API_URL no script.js para http://SEU-IP:5678/webhook/mural-rec
 ```
 Depois, abra o `mural/index.html` no navegador, envie um recado e veja ele aparecer no mural.
 
-## Passo 4: Debug
+## Passo 2: Debug
 
 É normal algo dar errado (CORS, URL de teste em vez de produção, workflow desativado...). Em vez de desistir, peça ajuda à IA. Abra o console do navegador (**F12**, aba **Console**), copie o erro e cole no prompt:
 
@@ -124,7 +124,7 @@ O navegador mostrou o erro abaixo ao enviar um recado. Investigue a causa, corri
 
 Se o import do JSON no n8n falhar, o mesmo vale: cole a mensagem de erro no Codex.
 
-## Passo 5: Ajustes de visual
+## Passo 3: Ajustes de visual
 
 Um bom exercício para praticar **ajustar o prompt conforme a resposta recebida**:
 
@@ -217,7 +217,7 @@ Cada aluna coloca no `script.js` dela:
 const API_URL = 'http://SEU-IP:5678/webhook/mural-recados';
 ```
 
-**6. Depois da aula**
+**4. Depois da aula**
 
 ```bash
 sudo ufw delete allow 5678/tcp
