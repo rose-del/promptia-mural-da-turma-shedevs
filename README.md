@@ -10,7 +10,6 @@ Neste projeto, você cria um **mural de recados** em que a turma toda escreve me
 - [Como funciona](#como-funciona)
 - [Pré-requisitos](#pré-requisitos)
 - [Estrutura do repositório](#estrutura-do-repositório)
-- [Passo 1: Backend no n8n](#passo-1-backend-no-n8n)
 - [Passo 2: Frontend](#passo-2-frontend)
 - [Passo 3: Conectar frontend e backend](#passo-3-conectar-frontend-e-backend)
 - [Passo 4: Debug](#passo-4-debug)
@@ -69,52 +68,6 @@ Abra o Codex em uma **pasta vazia** para começar o projeto.
 └── imagens/                    # slide e logo usados como referência visual
 ```
 
-## Passo 1: Backend no n8n
-
-Cole este prompt no Codex:
-
-```text
-Aja como um desenvolvedor especialista em n8n.
-
-Contexto: estou criando um "Mural de Recados" para uma aula de técnico em informática. Preciso de um backend no n8n que não use nenhuma credencial externa, nem banco de dados.
-
-Instrução: crie um arquivo workflow-mural.json, pronto para importar no n8n, com dois fluxos:
-
-1. POST /mural-recados
-   - recebe {nome, mensagem}
-   - valida se os dois campos existem, se o nome tem até 60 caracteres e se a mensagem tem até 140 caracteres
-   - substitui palavras proibidas por *** (lista simples com 5 palavras)
-   - salva o recado com data/hora no static data do workflow
-   - responde {ok: true}, ou {ok: false, erro: "..."} com status 400 se a validação falhar
-
-2. GET /mural-recados
-   - lê o static data e devolve os 20 recados mais recentes, do mais novo para o mais antigo, como uma lista de objetos {nome, mensagem, data}
-
-Requisitos técnicos:
-- Use nós Webhook e Respond to Webhook.
-- Libere o CORS para qualquer origem (opção Allowed Origins do nó Webhook e cabeçalhos na resposta).
-- Use o path "mural-recados".
-
-No final, explique em 5 linhas como importar o arquivo no n8n e ativar o workflow.
-
-Exemplo de recado salvo: {"nome": "Ana", "mensagem": "Boa sorte na prova!", "data": "2026-10-15T14:30:00"}
-```
-
-**Depois que o arquivo for gerado:**
-
-1. No n8n, abra o menu **⋯** e escolha **Import from file**.
-2. Selecione o `workflow-mural.json`.
-3. **Ative** o workflow (botão **Active**). Sem isso, a URL de produção não responde.
-4. Teste no terminal:
-
-   ```bash
-   curl -i http://localhost:5678/webhook/mural-recados
-   ```
-
-   Se responder `200 OK` com `[]` ou uma lista de recados, o backend está pronto.
-
-> Use sempre a URL com `/webhook/` (produção) e não `/webhook-test/`. Os recados só são salvos nas execuções de produção.
-
 ## Passo 2: Frontend
 
 Anexe as imagens de referência (slide e logo) e cole este prompt no Codex:
@@ -154,18 +107,9 @@ COMPORTAMENTO (script.js):
 - Cada post-it é um elemento com as classes: .note > .note-message (texto) e .note-meta > .note-author (nome) + a data formatada em pt-BR. Mensagens de "buscando" e "vazio" usam a classe .wall-placeholder.
 
 Exemplo do visual esperado: as imagens anexas (slide do roteiro e logo da SheDevs).
-```
 
-## Passo 3: Conectar frontend e backend
-
-Cole no Codex (troque `SEU-IP` pelo IP de quem está rodando o n8n, veja a seção [Compartilhando o mural com a turma](#compartilhando-o-mural-com-a-turma)):
-
-```text
 Troque o valor de API_URL no script.js para http://SEU-IP:5678/webhook/mural-recados e me explique, em linguagem simples, como abrir o site e testar enviando um recado.
 ```
-
-Se estiver testando sozinha no próprio computador, use `http://localhost:5678/webhook/mural-recados`.
-
 Depois, abra o `mural/index.html` no navegador, envie um recado e veja ele aparecer no mural.
 
 ## Passo 4: Debug
@@ -216,16 +160,12 @@ Adicione um filtro por nome no site e uma rota no n8n que devolva só os recados
 
 ## Compartilhando o mural com a turma
 
-Para todas verem os mesmos recados, **todas precisam usar o mesmo n8n**. Se cada pessoa rodar o n8n no próprio computador, cada uma terá um mural separado.
-
-> `localhost` significa "este computador". Por isso a URL `http://localhost:5678/...` só funciona no computador de quem roda o n8n. Para as outras pessoas, use o **IP** desse computador.
-
 A pessoa que vai hospedar o n8n (instrutora) faz o seguinte:
 
 **1. Descobrir o IP na rede**
 
 ```bash
-ip -4 addr show      # Linux (procure a interface do Wi-Fi, ex.: wlp2s0)
+ifconfig      # Linux (procure a interface do Wi-Fi, ex.: wlp2s0)
 ipconfig             # Windows (procure o "Endereço IPv4")
 ```
 
@@ -234,7 +174,7 @@ O IP tem a forma `192.168.x.x`. Ignore `127.0.0.1`, `docker0` e interfaces `br-.
 **2. Iniciar o n8n**
 
 ```bash
-npx n8n
+n8n
 ```
 
 O n8n já escuta em todas as interfaces por padrão. Para conferir:
@@ -304,43 +244,3 @@ E pare o n8n (Ctrl+C no terminal).
 - O filtro de palavras do projeto é simples (5 palavras). Ele serve para demonstrar a ideia, não para moderar conteúdo de verdade.
 - **Teste todos os prompts antes da aula.** O Codex pode gerar um JSON do n8n que precise de pequenos ajustes, e saber disso antes evita surpresas.
 - **Sempre entenda, revise e teste o código** produzido pela IA.
-
-## Atividade de comparação: prompt inicial x prompt final
-
-Para sentir na prática a diferença que um bom prompt faz, faça o mesmo pedido de duas formas e compare as respostas.
-
-**1. Prompt inicial** (use no começo do minicurso, antes de aprender a estrutura):
-
-```text
-Me dê uma ideia de projeto de informática voltado para estudantes.
-```
-
-**2. Prompt final** (use no fim, aplicando persona, contexto, instrução e restrições):
-
-```text
-Aja como uma mentora de projetos de tecnologia para estudantes do Ensino Médio.
-
-Eu sou uma estudante interessada em informática e quero desenvolver, por conta própria, um projeto de tecnologia que seja útil para outros estudantes. Ainda estou na etapa de escolher uma ideia e quero usar a Inteligência Artificial apenas como ferramenta de apoio para explorar possibilidades e organizar meus pensamentos.
-
-Apresente 3 ideias diferentes de projetos de informática que possam ser desenvolvidas por estudantes. Para cada uma, explique:
-- Qual problema dos estudantes o projeto poderia ajudar a resolver;
-- Quem seria o público-alvo;
-- Como a solução poderia funcionar de maneira geral;
-- Quais tecnologias poderiam ser utilizadas;
-- Qual seria um possível diferencial do projeto.
-
-Não desenvolva o projeto completo, não escreva o código e não escolha uma ideia por mim. Quero analisar as possibilidades, fazer minhas próprias escolhas e desenvolver a solução.
-
-Use uma linguagem clara e adequada para uma estudante que ainda está aprendendo sobre desenvolvimento de projetos de tecnologia. Ao final, faça algumas perguntas que me ajudem a refletir sobre qual das ideias combina mais com meus interesses e com os problemas que eu gostaria de resolver.
-```
-
-**Para refletir:** o que mudou entre as duas respostas? Qual delas ajuda mais você a decidir por conta própria?
-
-## Créditos
-
-Minicurso de IA, **SheDevs**.
-
-Julia Benjamin, Luana, Rosenilda Silva e Rubi Melo.
-IFPB, Análise e Desenvolvimento de Sistemas, Esperança-PB, 2026.
-
-> "Use a IA com consciência: ela é uma ferramenta, não um substituto para o seu raciocínio."
